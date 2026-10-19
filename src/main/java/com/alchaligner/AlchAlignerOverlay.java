@@ -5,10 +5,8 @@ import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import javax.inject.Inject;
-import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.Client;
 import net.runelite.api.Point;
 import net.runelite.api.gameval.InterfaceID;
@@ -22,7 +20,6 @@ import net.runelite.client.ui.overlay.OverlayPosition;
  * will be clickable once the game switches back to the inventory.
  * Slot positions are remembered from the last frame the inventory was visible.
  */
-@Slf4j
 class AlchAlignerOverlay extends Overlay
 {
 	private final Client client;
@@ -30,7 +27,6 @@ class AlchAlignerOverlay extends Overlay
 	private final AlchAlignerConfig config;
 
 	private final List<Rectangle> slots = new ArrayList<>();
-	private String lastStatus;
 
 	@Inject
 	AlchAlignerOverlay(Client client, AlchAlignerPlugin plugin, AlchAlignerConfig config)
@@ -54,29 +50,18 @@ class AlchAlignerOverlay extends Overlay
 		if (inventory != null && !inventory.isHidden())
 		{
 			rememberSlots(inventory);
-			setStatus("inventory open, remembered " + slots.size() + " slots: " + describeSlots());
 			return null;
 		}
 
 		Widget spellbook = client.getWidget(InterfaceID.MagicSpellbook.UNIVERSE);
-		if (spellbook == null || spellbook.isHidden())
+		if (spellbook == null || spellbook.isHidden() || slots.isEmpty())
 		{
-			setStatus("spellbook not open");
-			return null;
-		}
-		if (slots.isEmpty())
-		{
-			setStatus("spellbook open, but no inventory slots remembered yet");
 			return null;
 		}
 
-		List<Integer> spellComponents = plugin.getAlchemySpellComponents();
-		List<Rectangle> spells = getSpellBounds(spellComponents);
+		List<Rectangle> spells = getSpellBounds();
 		if (spells.isEmpty())
 		{
-			setStatus(spellComponents.isEmpty()
-				? "no alchemy spell castable (" + plugin.describeAlchemyRequirements() + ")"
-				: "alchemy spell icon hidden");
 			return null;
 		}
 
@@ -84,14 +69,12 @@ class AlchAlignerOverlay extends Overlay
 		Color targetColor = config.targetSlotColor();
 		Color targetBorderColor = new Color(targetColor.getRGB());
 
-		int drawn = 0;
 		for (Rectangle slot : slots)
 		{
 			if (!isNearAnySpell(slot, spells, range))
 			{
 				continue;
 			}
-			drawn++;
 
 			graphics.setColor(config.slotFillColor());
 			graphics.fill(slot);
@@ -117,20 +100,7 @@ class AlchAlignerOverlay extends Overlay
 			graphics.draw(slot);
 		}
 
-		setStatus("drawing " + drawn + " slots within " + range + "px of spells " + spells);
 		return null;
-	}
-
-	/**
-	 * Logs why the overlay is or isn't drawing, only when that changes, to diagnose it from the client log.
-	 */
-	private void setStatus(String status)
-	{
-		if (!status.equals(lastStatus))
-		{
-			lastStatus = status;
-			log.debug("Overlay: {}", status);
-		}
 	}
 
 	private static boolean isNearAnySpell(Rectangle slot, List<Rectangle> spells, int range)
@@ -169,24 +139,10 @@ class AlchAlignerOverlay extends Overlay
 		}
 	}
 
-	private String describeSlots()
-	{
-		if (slots.isEmpty())
-		{
-			return "none";
-		}
-		Rectangle union = new Rectangle(slots.get(0));
-		for (Rectangle slot : slots)
-		{
-			union.add(slot);
-		}
-		return "union " + union + ", " + new HashSet<>(slots).size() + " distinct, last " + slots.get(slots.size() - 1);
-	}
-
-	private List<Rectangle> getSpellBounds(List<Integer> spellComponents)
+	private List<Rectangle> getSpellBounds()
 	{
 		List<Rectangle> bounds = new ArrayList<>();
-		for (int component : spellComponents)
+		for (int component : plugin.getAlchemySpellComponents())
 		{
 			Widget spell = client.getWidget(component);
 			if (spell != null && !spell.isHidden())

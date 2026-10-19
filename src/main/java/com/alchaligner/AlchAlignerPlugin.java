@@ -4,7 +4,6 @@ import com.google.inject.Provides;
 import java.util.ArrayList;
 import java.util.List;
 import javax.inject.Inject;
-import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.Client;
 import net.runelite.api.Skill;
 import net.runelite.api.events.CanvasSizeChanged;
@@ -17,7 +16,6 @@ import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.ui.overlay.OverlayManager;
 
-@Slf4j
 @PluginDescriptor(
 	name = "Alch Aligner",
 	description = "Shows inventory slot click areas over the spellbook to line up alchemy casts",
@@ -90,13 +88,6 @@ public class AlchAlignerPlugin extends Plugin
 			spells.add(InterfaceID.MagicSpellbook.LOW_ALCHEMY);
 		}
 		return spells;
-	}
-
-	String describeAlchemyRequirements()
-	{
-		return "spellbook " + client.getVarbitValue(VarbitID.SPELLBOOK) + " (standard is " + STANDARD_SPELLBOOK + ")"
-			+ ", magic " + client.getBoostedSkillLevel(Skill.MAGIC)
-			+ ", low alchemy " + (config.lowAlchemy() ? "on" : "off");
 	}
 
 	@Provides
