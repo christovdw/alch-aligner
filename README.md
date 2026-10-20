@@ -9,8 +9,8 @@ When you cast High Level Alchemy, the game switches to the inventory, you click 
 - While the standard spellbook is open, outlines the inventory slots near the High Level Alchemy spell.
 - Highlights the part of each slot that the spell covers. A large spell icon (for example with the game's spell filtering enabled) can cover several slots, and each one is shown.
 - Includes empty slots, so you can see where an item will land before you move it there.
-- Only active on the standard spellbook with 55+ Magic.
-- Optional Low Level Alchemy support from 21 Magic. It is off by default, since Low Level Alchemy gives far fewer coins.
+- Only active on the standard spellbook while the game shows High Level Alchemy as castable, meaning you have 55+ Magic and the runes (staffs and rune pouch count).
+- Optional Low Level Alchemy support, shown while that spell is castable. It is off by default, since Low Level Alchemy gives far fewer coins.
 
 The plugin only draws on screen. It doesn't click, move or resize anything; you still cast every alch yourself.
 
